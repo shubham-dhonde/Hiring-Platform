@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id           String        @id @default(uuid())
+  startedAt    DateTime      @default(now())
+  endedAt      DateTime?
+  events       Event[]
+  chatMessages ChatMessage[]
+  testRuns     TestRun[]
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  sessionId String
+  type      String
+  data      String
+  timestamp DateTime @default(now())
+  session   Session  @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, timestamp])
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  sessionId  String
+  role       String
+  content    String
+  tokensUsed Int      @default(0)
+  timestamp  DateTime @default(now())
+  session    Session  @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, timestamp])
+}
+
+model TestRun {
+  id          String   @id @default(uuid())
+  sessionId   String
+  resultsJson String
+  score       Float    @default(0)
+  tier1Score  Float    @default(0)
+  tier2Score  Float    @default(0)
+  tier3Score  Float    @default(0)
+  tier4Score  Float    @default(0)
+  tier5Score  Float    @default(0)
+  timestamp   DateTime @default(now())
+  session     Session  @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, timestamp])
+}
